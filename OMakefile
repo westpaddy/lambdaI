@@ -1,0 +1,13 @@
+.PHONY: all clean
+
+PROGRAM = lambdaI
+
+.SUBDIRS: src
+	.DEFAULT: /.PHONY/all
+	all:
+		ocamlbuild -use-ocamlfind $(PROGRAM).byte
+
+.DEFAULT: all
+
+all:
+	cp src/$(PROGRAM).byte $(PROGRAM)

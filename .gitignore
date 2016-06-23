@@ -1,0 +1,7 @@
+/src/_build/
+/src/lambdaI.byte
+/lambdaI
+
+/.omakedb
+/.omakedb.lock
+/*.omc
