@@ -17,7 +17,8 @@ let rec generate (e : Term.t) : Type.aty * Env.t * Constraint.t * Skel.t =
       let aty = Type.Var a in
       let env = Env.(intersect env1 (applyF env2 f)) in
       let cstr = Constraint.(add (union cstr1 (applyF cstr2 f))
-                               (Type.Lift aty1) Type.(Lift (Arrow (Lift aty2, Var a))))
+                               (Type.Lift aty1)
+                               Type.(Lift (Arrow (Expand (f, Lift aty2), Var a))))
       in
       let skel = Skel.(App ((env, e, aty), skel1, applyF skel2 f)) in
       (aty, env, cstr, skel)
@@ -38,3 +39,44 @@ let rec generate (e : Term.t) : Type.aty * Env.t * Constraint.t * Skel.t =
           let skel = Skel.(Abs_I ((env, e, aty), skel')) in
           (aty, env, cstr, skel)
       end
+
+let simplify (cstr : Constraint.t) : Constraint.t =
+  let rec loop (ty1 : Type.t) (ty2 : Type.t) : Constraint.t =
+    match ty1, ty2 with
+    | Type.Expand (f1, ty1'), Type.Expand (f2, ty2')
+      when f1 = f2 ->
+        Constraint.applyF (loop ty1' ty2') f1
+    | Type.Lift (Type.Arrow (ty11, aty12)), Type.Lift (Type.Arrow (ty21, aty22)) ->
+        Constraint.union (loop ty11 ty21) (loop (Type.Lift aty12) (Type.Lift aty22))
+    | Type.Inter (ty11, ty12), Type.Inter (ty21, ty22) ->
+        Constraint.union (loop ty11 ty21) (loop ty12 ty22)
+    | _ ->
+        if ty1 = ty2 then Constraint.empty else Constraint.singleton ty1 ty2
+  in
+  Constraint.fold cstr Constraint.empty
+    (fun ty1 ty2 cstr' -> Constraint.union cstr' (loop ty1 ty2))
+
+let unify (cstr : Constraint.t) : Subst.t =
+  let rec drop_leading_fs ty1 ty2 =
+    match ty1, ty2 with
+    | Type.Expand (f1, ty1'), Type.Expand (f2, ty2')
+      when f1 = f2 ->
+        drop_leading_fs ty1' ty2'
+    | _ -> (ty1, ty2)
+  in
+  let rec loop (cstr : Constraint.t) (st : Subst.t) : Subst.t =
+    match cstr with
+    | [] -> st
+    | (ty1, ty2) :: _ ->
+        let ty1, ty2 = drop_leading_fs ty1 ty2 in
+        let st' = match ty1, ty2 with
+        | Type.Lift (Type.Var a), Type.Lift aty ->
+            Subst.single_t a aty
+        | Type.Lift aty, Type.Lift (Type.Var a) ->
+            Subst.single_t a aty
+        | Type.Expand (f, ty1), ty2 ->
+            Subst.single_e f (Expansion.extract_from_type ty2)
+        in
+        loop (simplify (Constraint.apply_subst cstr st')) (Subst.compose st st')
+  in
+  loop (simplify cstr) (Subst.empty)
