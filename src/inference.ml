@@ -1,13 +1,11 @@
-open Lang
-
-let rec generate (e : Term.t) : Type.aty * Env.t * Constraint.t * Skel.t =
+let rec generate (e : Term.t) : Type.aty * Env.t * Constraint.t * Deriv.t =
   match e with
   | Term.Var x ->
       let a = Type.fresh_tvar () in
       let aty = Type.Var a in
       let env = Env.extend Env.empty x (Type.Lift aty) in
       let cstr = [] in
-      let skel = Skel.Var (env, e, aty) in
+      let skel = Deriv.Var (env, e, aty) in
       (aty, env, cstr, skel)
   | Term.App (e1, e2) ->
       let aty1, env1, cstr1, skel1 = generate e1 in
@@ -20,7 +18,7 @@ let rec generate (e : Term.t) : Type.aty * Env.t * Constraint.t * Skel.t =
                                (Type.Lift aty1)
                                Type.(Lift (Arrow (Expand (f, Lift aty2), Var a))))
       in
-      let skel = Skel.(App ((env, e, aty), skel1, applyF skel2 f)) in
+      let skel = Deriv.(App ((env, e, aty), skel1, applyF skel2 f)) in
       (aty, env, cstr, skel)
   | Term.Abs (x, e') ->
       let aty', env', cstr', skel' = generate e' in
@@ -30,13 +28,13 @@ let rec generate (e : Term.t) : Type.aty * Env.t * Constraint.t * Skel.t =
           let aty = Type.(Arrow (Lift (Var a), aty')) in
           let env = env' in
           let cstr = cstr' in
-          let skel = Skel.(Abs_K ((env, e, aty), skel')) in
+          let skel = Deriv.(Abs_K ((env, e, aty), skel')) in
           (aty, env, cstr, skel)
       | Some ty_dom ->
           let aty = Type.(Arrow (ty_dom, aty')) in
           let env = Env.remove env' x in
           let cstr = cstr' in
-          let skel = Skel.(Abs_I ((env, e, aty), skel')) in
+          let skel = Deriv.(Abs_I ((env, e, aty), skel')) in
           (aty, env, cstr, skel)
       end
 
@@ -47,7 +45,7 @@ let simplify (cstr : Constraint.t) : Constraint.t =
       when f1 = f2 ->
         Constraint.applyF (loop ty1' ty2') f1
     | Type.Lift (Type.Arrow (ty11, aty12)), Type.Lift (Type.Arrow (ty21, aty22)) ->
-        Constraint.union (loop ty11 ty21) (loop (Type.Lift aty12) (Type.Lift aty22))
+        Constraint.union (loop ty21 ty11) (loop (Type.Lift aty12) (Type.Lift aty22))
     | Type.Inter (ty11, ty12), Type.Inter (ty21, ty22) ->
         Constraint.union (loop ty11 ty21) (loop ty12 ty22)
     | _ ->
@@ -75,7 +73,10 @@ let unify (cstr : Constraint.t) : Subst.t =
         | Type.Lift aty, Type.Lift (Type.Var a) ->
             Subst.single_t a aty
         | Type.Expand (f, ty1), ty2 ->
-            Subst.single_e f (Expansion.extract_from_type ty2)
+            Subst.single_e f (Type.extract_expansion ty2)
+        | _ ->
+            Format.printf "failed to unify: @[%a@\n%a@]@\n" Type.pp ty1 Type.pp ty2;
+            exit 1
         in
         loop (simplify (Constraint.apply_subst cstr st')) (Subst.compose st st')
   in
