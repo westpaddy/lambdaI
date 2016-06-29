@@ -3,8 +3,9 @@ open Format
 type replacer =
   | T of Type.tvar * Type.aty
   | E of Type.evar * Type.ex
+[@@deriving to_yojson]
 
-type t = replacer list
+type t = replacer list [@@deriving to_yojson]
 
 let pp_replacer (fmt : formatter) (r : replacer) : unit =
   match r with

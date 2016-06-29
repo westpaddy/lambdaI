@@ -17,4 +17,4 @@ all:
 web:
 	cp src/_build/calc.js js/calc.js
 	cp src/_build/calc.map public/calc.map
-	webpack js/index.js public/bundle.js
+	webpack

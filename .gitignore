@@ -8,3 +8,4 @@
 /.omakedb
 /.omakedb.lock
 /*.omc
+/node_modules/

@@ -1,0 +1,16 @@
+table {
+    margin: auto;
+}
+
+td {
+    text-align: center;
+    vertical-align: bottom;
+}
+
+.conclusion > td {
+    border-top: solid 2px #000;
+}
+
+input {
+    width: 100%;
+}

@@ -45,6 +45,9 @@ let ecounter = ref 0
 let fresh_evar () : evar =
   incr ecounter; (!ecounter, "")
 
+let reset_counter () : unit =
+  tcounter := 0; ecounter := 0
+
 let rec rename_vars_aty (aty : aty) (s : string) : aty =
   match aty with
   | Var (d, l) -> Var (d, l ^ s)
@@ -60,6 +63,7 @@ type ex =
   | E_Hole
   | E_Inter of ex * ex
   | E_Expand of evar * ex
+[@@deriving to_yojson]
 
 let rec pp_ex (fmt : formatter) (ex : ex) : unit =
   match ex with
