@@ -1,13 +1,22 @@
-.PHONY: all clean
+.PHONY: all web clean
 
 PROGRAM = lambdaI
 
 .SUBDIRS: src
 	.DEFAULT: /.PHONY/all
 	all:
-		ocamlbuild -use-ocamlfind $(PROGRAM).byte
+		ocamlbuild -use-ocamlfind -no-plugin $(PROGRAM).byte
+	_build/calc.js:
+		ocamlbuild -use-ocamlfind -plugin-tag "package(js_of_ocaml.ocamlbuild)" calc.js
 
 .DEFAULT: all
 
 all:
 	cp src/$(PROGRAM).byte $(PROGRAM)
+
+web: public/bundle.js
+
+public/bundle.js: src/_build/calc.js js/index.js
+	cp src/_build/calc.js js/calc.js
+	cp src/_build/calc.map public/calc.map
+	webpack js/index.js public/bundle.js

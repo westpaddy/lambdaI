@@ -1,6 +1,9 @@
 /src/_build/
 /src/lambdaI.byte
 /lambdaI
+/js/calc.js
+/public/bundle.js
+/public/calc.map
 
 /.omakedb
 /.omakedb.lock
