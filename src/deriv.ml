@@ -1,8 +1,8 @@
 open Format
 
-type judge = Env.t * Term.t * Type.aty
+type judge = Env.t * Term.t * Type.aty [@@deriving to_yojson]
 
-type judge_e = Env.t * Term.t * Type.t
+type judge_e = Env.t * Term.t * Type.t [@@deriving to_yojson]
 
 type t =
   | Var of judge
@@ -11,6 +11,7 @@ type t =
   | Abs_K of judge * t
   | App of judge * t * t
   | F of judge_e * t
+[@@deriving to_yojson]
 
 let pp_judge (fmt : formatter) (env, e, aty : judge) : unit =
   fprintf fmt "@[%a |-@ %a :@ %a@]" Env.pp env Term.pp e Type.pp_aty aty

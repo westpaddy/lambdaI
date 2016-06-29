@@ -1,13 +1,13 @@
 open Format
 
-type tvar = int * string
+type tvar = int * string [@@deriving to_yojson]
 
 let pp_tvar (fmt : formatter) (tvar : tvar) : unit =
   match tvar with
   | d, "" -> fprintf fmt "'a%d" d
   | d, l -> fprintf fmt "'a%d\"%s\"" d l
 
-type evar = int * string
+type evar = int * string [@@deriving to_yojson]
 
 let pp_evar (fmt : formatter) (evar : evar) : unit =
   match evar with
@@ -22,6 +22,7 @@ and t =
   | Lift of aty
   | Inter of t * t
   | Expand of evar * t
+[@@deriving to_yojson]
 
 let rec pp_aty (fmt : formatter) (aty : aty) : unit =
   match aty with

@@ -1,6 +1,6 @@
 open Format
 
-type t = (Term.var * Type.t) list
+type t = (Term.var * Type.t) list [@@deriving to_yojson]
 
 let pp (fmt : formatter) (env : t) : unit =
   fprintf fmt "{@[<v>%a@]}"
