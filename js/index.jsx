@@ -6,7 +6,7 @@ import * as Printer from './printer.jsx';
 
 class Query extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
         this.state = {
             term: '',
             skel: [undefined],

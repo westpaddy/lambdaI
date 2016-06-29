@@ -11,6 +11,21 @@ td {
     border-top: solid 2px #000;
 }
 
+td.rule {
+    border: 0;
+    padding-bottom: 1.3em;
+    cursor: pointer;
+}
+
+.env {
+    cursor: pointer;
+}
+
+.pad {
+    width: 1em;
+    height: 1em;
+}
+
 input {
     width: 100%;
 }

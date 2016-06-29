@@ -30,6 +30,7 @@ let intersect (env1 : t) (env2 : t) : t =
       | None -> (x1, t1)
       | Some t2 -> (x1, Type.Inter (t1, t2)))
   in
+  let env2 = List.fold_left (fun env2 (x1, _) -> remove env2 x1) env2 env1 in
   env1 @ env2
 
 let applyF (env : t) (f : Type.evar) : t =

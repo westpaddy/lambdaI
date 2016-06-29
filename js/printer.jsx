@@ -36,8 +36,42 @@ export const Type = (props) => {
     };
 }
 
-const Env = (props) => {
-    return (<span>E</span>);
+class Env extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            visible: false
+        };
+    }
+
+    render() {
+        if (this.state.visible) {
+            return (<span className="env" onClick={ e => this.toggle() }>{this.render_assigns()}</span>);
+        } else {
+            return (<span className="env" onClick={ e => this.toggle() }>E</span>);
+        }
+    }
+
+    toggle() {
+        this.setState(Object.assign({}, this.state, {
+            visible: !this.state.visible
+        }));
+    }
+
+    render_assigns() {
+        if (this.props.val.length === 0) {
+            return (<span>∅</span>);
+        } else if (this.props.val.length === 1) {
+            return (<span>{this.props.val[0][0]}:<Type val={this.props.val[0][1]} /></span>);
+        } else {
+            return (<span>
+                <span>{this.props.val[0][0]}:<Type val={this.props.val[0][1]} /></span>
+                {this.props.val.slice(1).map(function(assign) {
+                     return (<span key={assign.toString()}>; {assign[0]}:<Type val={assign[1]} /></span>);
+                 })}
+            </span>);
+        }
+    }
 }
 
 export const Constraint = (props) => {
@@ -90,34 +124,50 @@ const Judge = (props) => {
 
 export class Deriv extends React.Component {
     constructor(props) {
-        super(props)
+        super(props);
+        this.state = {
+            visible: true
+        };
     }
 
     render() {
         const v = this.props.val;
-        switch (v[0]) {
-            case "Var":
-                return (<table><tbody>
-                    <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
-                </tbody></table>);
-                break;
-            case "Inter":
-            case "App":
-                return (<table><tbody>
-                    <tr className="premise"><td><Deriv val={v[2]} /></td><td><Deriv val={v[3]} /></td></tr>
-                    <tr className="conclusion"><td colSpan="2"><Judge val={v[1]} /></td></tr>
-                </tbody></table>);
-            case "Abs_I":
-            case "Abs_K":
-            case "F":
-                return (<table><tbody>
-                    <tr className="premise"><td><Deriv val={v[2]} /></td></tr>
-                    <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
-                </tbody></table>);
-            default:
-                console.debug("unknown derivation");
-                console.debug(v);
-                return (<div></div>);
+        if (this.state.visible) {
+            switch (v[0]) {
+                case "Var":
+                    return (<table><tbody>
+            <tr className="premise"><td><div className="pad"></div></td><td rowSpan="2" className="rule"><span onClick={ e => this.toggle() }>Var</span></td></tr>
+            <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
+                    </tbody></table>);
+                case "Inter":
+                case "App":
+                    return (<table><tbody>
+                        <tr className="premise"><td><Deriv val={v[2]} /></td><td><Deriv val={v[3]} /></td><td rowSpan="2" className="rule"><span onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
+                        <tr className="conclusion"><td colSpan="2"><Judge val={v[1]} /></td></tr>
+                    </tbody></table>);
+                case "Abs_I":
+                case "Abs_K":
+                case "F":
+                    return (<table><tbody>
+                        <tr className="premise"><td><Deriv val={v[2]} /></td><td rowSpan="2"  className="rule"><span onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
+                        <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
+                    </tbody></table>);
+                default:
+                    console.debug("unknown derivation");
+                    console.debug(v);
+                    return (<div></div>);
+            }
+        } else {
+            return (<table><tbody>
+                        <tr className="premise"><td>⋮</td><td rowSpan="2" className="rule"><span onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
+                        <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
+            </tbody></table>);
         }
+    }
+
+    toggle() {
+        this.setState(Object.assign({}, this.state, {
+            visible: !this.state.visible
+        }));
     }
 }
