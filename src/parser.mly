@@ -17,8 +17,8 @@ top_phrase:
 ;;
 
 expr:
-  FUN; x = LIDENT; RARROW; e = expr;
-    { Abs (x, e) }
+  FUN; params = nonempty_list(LIDENT); RARROW; e = expr;
+    { List.fold_right (fun x e -> Abs (x, e)) params e }
 | e = app_expr;
     { e }
 ;;
