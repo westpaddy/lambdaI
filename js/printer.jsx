@@ -178,9 +178,15 @@ export class Deriv extends React.Component {
                     return (<div></div>);
             }
         } else {
+            var rulename = v[0];
+            if (rulename === "F") {
+                rulename = (<div>F<sub>{v[3][0]}</sub><sup>{v[3][1]}</sup></div>);
+            } else {
+                rulename = (<div>{rulename}</div>);
+            }
             return (<table><tbody>
                         <tr className="premise"><td>⋮</td></tr>
-                        <tr className="conclusion"><td><Judge val={v[1]} /><span className="rule" onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
+                        <tr className="conclusion"><td><Judge val={v[1]} /><div className="rule" onClick={ e => this.toggle() }>{rulename}</div></td></tr>
             </tbody></table>);
         }
     }
