@@ -9,12 +9,25 @@ td {
 
 .conclusion > td {
     border-top: solid 2px #000;
+    position: relative;
 }
 
-td.rule {
-    border: 0;
-    padding-bottom: 1.3em;
+.rule {
+    position: absolute;
+    left: 100%;
+    top: -1.3em;
+}
+
+.rule > div {
+    display:table-cell;
+    vertical-align: middle;
     cursor: pointer;
+    height: 2em;
+}
+
+.span {
+    width: 2.5em;
+    height: 1em;
 }
 
 .env {

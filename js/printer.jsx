@@ -6,9 +6,17 @@ const Term = (props) => {
         case "Var":
             return (<span>{v[1]}</span>);
         case "App":
-            return (<span>(<Term val={v[1]} /> <Term val={v[2]} />)</span>);
+            if (props.lv > 1) {
+                return (<span>(<Term val={v[1]} lv={1} /> <Term val={v[2]} lv={2} />)</span>);
+            } else {
+                return (<span><Term val={v[1]} lv={1} /> <Term val={v[2]} lv={2} /></span>);
+            }
         case "Abs":
-            return (<span>(λ{v[1]}.<Term val={v[2]} />)</span>);
+            if (props.lv > 0) {
+                return (<span>(λ{v[1]}.<Term val={v[2]} lv={0} />)</span>);
+            } else {
+                return (<span>λ{v[1]}.<Term val={v[2]} lv={0} /></span>);
+            }
         default:
             console.debug("unknown term");
             console.debug(v);
@@ -22,13 +30,21 @@ export const Type = (props) => {
         case "Var":
             return (<span>α<sub>{v[1][0]}</sub><sup>{v[1][1]}</sup></span>);
         case "Arrow":
-            return (<span>(<Type val={v[1]} /> → <Type val={v[2]} />)</span>);
+            if (props.lv > 0) {
+                return (<span>(<Type val={v[1]} lv={1} /> → <Type val={v[2]} lv={0} />)</span>);
+            } else {
+                return (<span><Type val={v[1]} lv={1} /> → <Type val={v[2]} lv={0} /></span>);
+            }
         case "Lift":
-            return (<Type val={v[1]} />);
+            return (<Type val={v[1]} lv={props.lv} />);
         case "Inter":
-            return (<span>(<Type val={v[1]} /> ∧ <Type val={v[2]} />)</span>);
+            if (props.lv > 2) {
+                return (<span>(<Type val={v[1]} lv={3} /> ∧ <Type val={v[2]} lv={2} />)</span>);
+            } else {
+                return (<span><Type val={v[1]} lv={3} /> ∧ <Type val={v[2]} lv={2} /></span>);
+            }
         case "Expand":
-            return (<span>(F<sub>{v[1][0]}</sub><sup>{v[1][1]}</sup> <Type val={v[2]} />)</span>);
+            return (<span>F<sub>{v[1][0]}</sub><sup>{v[1][1]}</sup><Type val={v[2]} lv={4} /></span>);
         default:
             console.debug("unkown type");
             console.debug(v);
@@ -136,25 +152,25 @@ export class Deriv extends React.Component {
             switch (v[0]) {
                 case "Var":
                     return (<table><tbody>
-            <tr className="premise"><td><div className="pad"></div></td><td rowSpan="2" className="rule"><span onClick={ e => this.toggle() }>Var</span></td></tr>
-            <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
+            <tr className="premise"><td><div className="pad"></div></td></tr>
+            <tr className="conclusion"><td><Judge val={v[1]} /><div className="rule" onClick={ e => this.toggle() }><div>Var</div></div></td></tr>
                     </tbody></table>);
                 case "Inter":
                 case "App":
                     return (<table><tbody>
-                        <tr className="premise"><td><Deriv val={v[2]} /></td><td><Deriv val={v[3]} /></td><td rowSpan="2" className="rule"><span onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
-                        <tr className="conclusion"><td colSpan="2"><Judge val={v[1]} /></td></tr>
+                        <tr className="premise"><td><Deriv val={v[2]} /></td><td><div className="span"></div></td><td><Deriv val={v[3]} /></td></tr>
+                        <tr className="conclusion"><td colSpan="3"><Judge val={v[1]} /><div className="rule" onClick={ e => this.toggle() }><div>{v[0]}</div></div></td></tr>
                     </tbody></table>);
                 case "Abs_I":
                 case "Abs_K":
                     return (<table><tbody>
-                        <tr className="premise"><td><Deriv val={v[2]} /></td><td rowSpan="2"  className="rule"><span onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
-                        <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
+                        <tr className="premise"><td><Deriv val={v[2]} /></td></tr>
+                        <tr className="conclusion"><td><Judge val={v[1]} /><div className="rule" onClick={ e => this.toggle() }><div>{v[0]}</div></div></td></tr>
                     </tbody></table>);
                 case "F":
                     return (<table><tbody>
-                        <tr className="premise"><td><Deriv val={v[2]} /></td><td rowSpan="2"  className="rule"><span onClick={ e => this.toggle() }>F<sub>{v[3][0]}</sub><sup>{v[3][1]}</sup></span></td></tr>
-                        <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
+                        <tr className="premise"><td><Deriv val={v[2]} /></td></tr>
+                        <tr className="conclusion"><td><Judge val={v[1]} /><div className="rule" onClick={ e => this.toggle() }><div>F<sub>{v[3][0]}</sub><sup>{v[3][1]}</sup></div></div></td></tr>
                     </tbody></table>);
                 default:
                     console.debug("unknown derivation");
@@ -163,8 +179,8 @@ export class Deriv extends React.Component {
             }
         } else {
             return (<table><tbody>
-                        <tr className="premise"><td>⋮</td><td rowSpan="2" className="rule"><span onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
-                        <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
+                        <tr className="premise"><td>⋮</td></tr>
+                        <tr className="conclusion"><td><Judge val={v[1]} /><span className="rule" onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
             </tbody></table>);
         }
     }
