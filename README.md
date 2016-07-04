@@ -1,7 +1,7 @@
 lambdaI
 ========
 
-An implementation of type inferenc algorithm in [1].
+An implementation of type inference algorithm in [1].  You can try it at <https://www.fos.kuis.kyoto-u.ac.jp/~nishida/lambdaI/>.
 
 ## Reference
 
@@ -42,6 +42,8 @@ Skel:<ABS_I:{} |- (fun x -> x) : ('a1 -> 'a1)
             <VAR:{x : 'a1} |- x : 'a1>>
 Cstr:{}
 Unifier:{||}
+Deriv:<ABS_I:{} |- (fun x -> x) : ('a11 -> 'a11)
+             <VAR:{x : 'a11} |- x : 'a11>>
 Type:('a1 -> 'a1)
 > fun x -> x x;;
 Skel:<ABS_I:{} |- (fun x -> (x x)) : (('a3 /\ (F1 'a4)) -> 'a5)
@@ -52,6 +54,15 @@ Skel:<ABS_I:{} |- (fun x -> (x x)) : (('a3 /\ (F1 'a4)) -> 'a5)
                     <VAR:{x : 'a4} |- x : 'a4>>>>
 Cstr:{'a3 = ((F1 'a4) -> 'a5)}
 Unifier:{|'a3 := ((F1 'a4) -> 'a5)|}
+Deriv:<ABS_I:{} |- (fun x -> (x x)) : ((((F4 'a14) -> 'a15) /\ (F4 'a14)) ->
+             'a15)
+             <APP:{x : (((F4 'a14) ->
+                   'a15) /\
+                   (F4 'a14))} |- (x x) : 'a15
+                  <VAR:{x : ((F4 'a14) ->
+                        'a15)} |- x : ((F4 'a14) -> 'a15)>
+                  <F4:{x : (F4 'a14)} |- x : (F4 'a14)
+                      <VAR:{x : 'a14} |- x : 'a14>>>>
 Type:((((F1 'a4) -> 'a5) /\ (F1 'a4)) -> 'a5)
 >
 ```
