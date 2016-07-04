@@ -24,6 +24,12 @@ let extend (env : t) (x : Term.var) (ty : Type.t) : t =
 let remove (env : t) (x : Term.var) : t =
   List.filter (fun (x', _) -> x' <> x) env
 
+let map_cod (env : t) (f : Type.t -> Type.t) : t =
+  List.map (fun (x, ty) -> (x, f ty)) env
+
+let rename_vars (env : t) (s : string) : t =
+  map_cod env (fun ty -> Type.rename_vars ty s)
+
 let intersect (env1 : t) (env2 : t) : t =
   let env1 = env1 |> List.map (fun (x1, t1) ->
       match lookup env2 x1 with
@@ -34,4 +40,13 @@ let intersect (env1 : t) (env2 : t) : t =
   env1 @ env2
 
 let applyF (env : t) (f : Type.evar) : t =
-  List.map (fun (x, ty) -> (x, Type.Expand (f, ty))) env
+  map_cod env (fun ty -> Type.Expand (f, ty))
+
+let replace_tvar (env : t) (a : Type.tvar) (aty : Type.aty) : t =
+  map_cod env (fun ty -> Type.replace_tvar ty a aty)
+
+let replace_evar (env : t) (f : Type.evar) (ex : Type.ex) : t =
+  map_cod env (fun ty -> Type.replace_evar ty f ex)
+
+let applySubst (env : t) (st : Subst.t) : t =
+  Subst.apply st replace_tvar replace_evar env

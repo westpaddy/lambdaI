@@ -147,9 +147,13 @@ export class Deriv extends React.Component {
                     </tbody></table>);
                 case "Abs_I":
                 case "Abs_K":
-                case "F":
                     return (<table><tbody>
                         <tr className="premise"><td><Deriv val={v[2]} /></td><td rowSpan="2"  className="rule"><span onClick={ e => this.toggle() }>{v[0]}</span></td></tr>
+                        <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
+                    </tbody></table>);
+                case "F":
+                    return (<table><tbody>
+                        <tr className="premise"><td><Deriv val={v[2]} /></td><td rowSpan="2"  className="rule"><span onClick={ e => this.toggle() }>F<sub>{v[3][0]}</sub><sup>{v[3][1]}</sup></span></td></tr>
                         <tr className="conclusion"><td><Judge val={v[1]} /></td></tr>
                     </tbody></table>);
                 default:

@@ -19,11 +19,20 @@ let add (cstr : t) (ty1 : Type.t) (ty2 : Type.t) : t =
 let union (cstr1 : t) (cstr2 : t) : t =
   List.fold_left (fun cstr (ty1, ty2) -> add cstr ty1 ty2) cstr1 cstr2
 
-let applyF (cstr : t) (f : Type.evar) : t =
-  List.map (fun (ty1, ty2) -> (Type.Expand (f, ty1), Type.Expand (f, ty2))) cstr
-
 let fold (cstr : t) (init : 'a) (f : Type.t -> Type.t -> 'a -> t) : t =
   List.fold_left (fun acc (ty1, ty2) -> f ty1 ty2 acc) init cstr
 
-let apply_subst (cstr : t) (st : Subst.t) : t =
-  List.map (fun (ty1, ty2) -> (Subst.apply st ty1, Subst.apply st ty2)) cstr
+let map (cstr : t) (f : Type.t -> Type.t) : t =
+  List.map (fun (ty1, ty2) -> (f ty1, f ty2)) cstr
+
+let applyF (cstr : t) (f : Type.evar) : t =
+  map cstr (fun ty -> Type.Expand (f, ty))
+
+let replace_tvar (cstr : t) (a : Type.tvar) (aty : Type.aty) : t =
+  map cstr (fun ty -> Type.replace_tvar ty a aty)
+
+let replace_evar (cstr : t) (f : Type.evar) (ex : Type.ex) : t =
+  map cstr (fun ty -> Type.replace_evar ty f ex)
+
+let applySubst (cstr : t) (st : Subst.t) : t =
+  Subst.apply st replace_tvar replace_evar cstr

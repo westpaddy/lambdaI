@@ -5,7 +5,7 @@ type skel_ret =
 
 type infer_ret =
   | I_Error of string
-  | I_Succ of Type.t * Subst.t * Deriv.t
+  | I_Succ of Type.aty * Subst.t * Deriv.t
 [@@deriving to_yojson]
 
 let _ =
@@ -31,7 +31,8 @@ let _ =
             let _, e = Parser.top_phrase Lexer.token lexbuf in
             let aty, _, cstr, skel = Inference.generate e in
             let st = Inference.unify cstr in
-            I_Succ (Subst.apply st (Type.Lift aty), st, skel)
+            let deriv = Deriv.applySubst skel st in
+            I_Succ (Subst.apply_aty st aty, st, deriv)
           with
           | _ ->
               I_Error "fatal error"

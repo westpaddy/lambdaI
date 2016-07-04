@@ -48,16 +48,22 @@ let fresh_evar () : evar =
 let reset_counter () : unit =
   tcounter := 0; ecounter := 0
 
+let rename_tvar (d, l : tvar) (s : string) : tvar =
+  (d, l ^ s)
+
+let rename_evar (d, l : evar) (s : string) : evar =
+  (d, l ^ s)
+
 let rec rename_vars_aty (aty : aty) (s : string) : aty =
   match aty with
-  | Var (d, l) -> Var (d, l ^ s)
+  | Var a -> Var (rename_tvar a s)
   | Arrow (ty, aty) -> Arrow (rename_vars ty s, rename_vars_aty aty s)
 
 and rename_vars (ty : t) (s : string) : t =
   match ty with
   | Lift aty -> Lift (rename_vars_aty aty s)
   | Inter (ty1, ty2) -> Inter (rename_vars ty1 s, rename_vars ty2 s)
-  | Expand ((d, l), ty) -> Expand ((d, l ^ s), rename_vars ty s)
+  | Expand (f, ty) -> Expand (rename_evar f s, rename_vars ty s)
 
 type ex =
   | E_Hole

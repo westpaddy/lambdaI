@@ -78,6 +78,6 @@ let unify (cstr : Constraint.t) : Subst.t =
             Format.printf "failed to unify: @[%a@\n%a@]@\n" Type.pp ty1 Type.pp ty2;
             exit 1
         in
-        loop (simplify (Constraint.apply_subst cstr st')) (Subst.compose st st')
+        loop (simplify (Constraint.applySubst cstr st')) (Subst.compose st st')
   in
   loop (simplify cstr) (Subst.empty)

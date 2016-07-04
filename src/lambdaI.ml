@@ -14,7 +14,8 @@ let () =
         let () = printf "Cstr:@[%a@]@\n" Constraint.pp cstr in
         let st = Inference.unify cstr in
         let () = printf "Unifier:@[%a@]@\n" Subst.pp st in
-        let () = printf "Type:@[%a@]@\n" Type.pp (Subst.apply st (Type.Lift aty)) in
+        let () = printf "Deriv:@[%a@]@\n" Deriv.pp (Deriv.applySubst skel st) in
+        let () = printf "Type:@[%a@]@\n" Type.pp_aty (Subst.apply_aty st aty) in
         env
       with
       | Failure "lexing: empty token" ->
